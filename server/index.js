@@ -1,11 +1,20 @@
 // index file to run the server //
 
+
 const express = require("express");
-
-const app = express(); 
-const PORT = 5000;      
-
 const mongoose = require("mongoose");
+const Todo = require("./models/todo");
+
+
+
+const app = express(); // creating the app
+const cors = require("cors");
+app.use(cors()); //Enable CORS for all routes
+
+
+app.use(express.json()); // using middleware 
+
+const PORT = 5000;      
 
 // connect to local MongoDB
 mongoose.connect("mongodb://127.0.0.1:27017/ToDoApp");
@@ -23,15 +32,40 @@ app.get("/", (req, res) => {
 });
 
 
-app.get("/todos", (req, res) => {
-    const sampleTodos = [
-      { id: 1, task: "Buy milk", done: false },
-      { id: 2, task: "Walk the dog", done: true },
-      { id: 3, task: "Do laundry", done: false },
-    ];
-  
-    res.json(sampleTodos); 
-  });
+app.get("/todos", async (req, res) => {
+  try {
+    const todos = await Todo.find(); // get all todos from the database
+    res.json(todos); // send them to the browser
+  } catch (err) {
+    console.error("Error fetching todos:", err.message);
+    res.status(500).json({ error: "Something went wrong..." });
+  }
+});
+
+app.post("/todos", async (req, res) => {
+  try {
+    const { task } = req.body;
+
+    // Check if task is provided
+    if (!task) {
+      return res.status(400).json({ error: "Task is required" });
+    }
+
+    // Create new TODO using the Mongoose model
+    const newTodo = new Todo({
+      task: task,
+      // stateOfCompletion and dateOfCreation use default values
+    });
+
+    const savedTodo = await newTodo.save(); // Save to MongoDB
+
+    res.status(201).json(savedTodo); // Return the new TODO
+  } catch (err) {
+    console.error("Error creating TODO:", err.message);
+    res.status(500).json({ error: "Server error" });
+  }
+});
+
 
   app.listen(PORT, () => {
     console.log(`Server is running at http://localhost:${PORT}`);
