@@ -1,113 +1,115 @@
+document.addEventListener("DOMContentLoaded", () => { // wating until HTML is fully loaded 
+  const todoList = document.getElementById("todo-list");
+  const todoForm = document.getElementById("todo-form");
+  const taskInput = document.getElementById("task-input");
+  let hideCompleted = false; 
 
-document.addEventListener("DOMContentLoaded", () => {
-    const todoList = document.getElementById("todo-list");
-    const todoForm = document.getElementById("todo-form");
-    const taskInput = document.getElementById("task-input");
+  // Toggle for hiding comp,leted tasks
+  document.getElementById("hideCompletedToggle")?.addEventListener("change", (e) => {
+      hideCompleted = e.target.checked;
+      loadTodos();
+  });
 
-  // loading tasks
+  // loading all tasks from the backend and displaying them
   function loadTodos() {
-    fetch("http://127.0.0.1:3001/todos")
-    .then(response => response.json())
-    .then(todos => {
-      todoList.innerHTML = "";
-      todos.forEach(todo => {
-        const listItem = document.createElement("li");
+  fetch("http://127.0.0.1:3001/todos")
+  .then(response => response.json())
+  .then(todos => {
+    todoList.innerHTML = "";
+    todos.forEach(todo => {
+      
+    if (hideCompleted && todo.stateOfCompletion) return;
 
-        const checkbox = document.createElement("input");
-        checkbox.type = "checkbox";
-        checkbox.checked = todo.stateOfCompletion;
+    // creating <li>> for each task
+    const listItem = document.createElement("li");
+    listItem.classList.add("mb-2", "list-group-item", "d-flex", "align-items-center");
 
-       
+    // creating a checkbox for marking when a task is completed 
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.className = "form-check-input me-2";
+    checkbox.checked = todo.stateOfCompletion;
 
-        // done options
-        checkbox.addEventListener("change", () => {
-          if (checkbox.checked) {
-            fetch(`http://127.0.0.1:3001/todos/${todo._id}`, {
-              method: "PUT"
-            })
-              .then(response => response.json())
-              .then(updated => {
-                console.log("Marked as done:", updated);
-                loadTodos(); 
-              });
-          }
-        });
+// checkbox event - marking a task as completed / incompleted
+checkbox.addEventListener("change", () => {
+  const updatedCompletionState = checkbox.checked;
+
+  //  updating UI
+  todo.stateOfCompletion = updatedCompletionState;
+  taskText.className = updatedCompletionState 
+    ? "text-decoration-line-through text-muted" 
+    : "";
+
+  // sending update to backend
+  fetch(`http://127.0.0.1:3001/todos/${todo._id}`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ 
+      stateOfCompletion: updatedCompletionState
+    })
+  })
+  .then(response => {
+    
+    // hiding completed tasks and reloading 
+    if (hideCompleted) {
+      loadTodos();
+    }
+  })
+
+});
 
 
-        
+  // containers with tasks
+  const taskText = document.createElement("span");
+  taskText.textContent = todo.task;
+  taskText.className = todo.stateOfCompletion ? "text-decoration-line-through text-muted" : "";
 
-        // delete button
+  // delete button
+  const deleteButton = document.createElement("button");
+  deleteButton.innerHTML = '<i class="bi bi-trash"></i>';
+  deleteButton.className = "btn btn-outline-danger btn-sm ms-auto"; 
 
-        const deleteButton = document.createElement("button");
-        deleteButton.textContent = "delete";
-        deleteButton.style.marginLeft = "10px";
-        deleteButton.style.padding = "3px 6px";
-        deleteButton.style.backgroundColor = "#f44336";
-        deleteButton.style.color = "#fff";
-        deleteButton.style.border = "none";
-        deleteButton.style.borderRadius = "4px";
-        deleteButton.style.cursor = "pointer";
-        deleteButton.addEventListener("click", () => {
-          fetch(`http://127.0.0.1:3001/todos/${todo._id}`, {
-            method: "DELETE"
-          })
-            .then(res => res.json())
-            .then(() => loadTodos());
-        });
+  // deleting event
+  deleteButton.addEventListener("click", () => {
+      fetch(`http://127.0.0.1:3001/todos/${todo._id}`, {
+          method: "DELETE"
+      })
+      .then(() => loadTodos());
+  });
+  
+  // Appending all elements
+  listItem.appendChild(checkbox);
+  listItem.appendChild(taskText);
+  listItem.appendChild(deleteButton);
+  todoList.appendChild(listItem);
 
-        listItem.appendChild(checkbox);
-        listItem.appendChild(document.createTextNode(" " + todo.task));
-        listItem.appendChild(deleteButton);
-        todoList.appendChild(listItem);
-      });
+
     });
-
-
-
-
-  }
+});
+ }
 
   loadTodos();
 
-  // Add new TODO (POST)
+  // adding new TODO (POST)
   todoForm.addEventListener("submit", (e) => {
-    e.preventDefault(); 
+      e.preventDefault();
+      const newTask = taskInput.value.trim();
+      if (newTask === "") return;
 
-    const newTask = taskInput.value.trim();
-    if (newTask === "") return;
-
-    fetch("http://127.0.0.1:3001/todos", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ task: newTask })
-    })
-      .then(response => response.json())
-      .then(data => {
-        console.log("Task added:", data);
-        taskInput.value = ""; 
-        loadTodos(); 
+      fetch("http://127.0.0.1:3001/todos", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json"
+          },
+          body: JSON.stringify({ task: newTask })
       })
-      .catch(error => {
-        console.error("Error adding task:", error);
-      });
+      .then(response => response.json())
+      .then(() => {
+          taskInput.value = "";
+          loadTodos();
+      })
+      .catch(console.error);
   });
-
-
-  
-    // // Fetch TODOs from backend
-    // fetch("http://localhost:5000/todos")
-    //   .then(response => response.json())
-    //   .then(todos => {
-    //     todos.forEach(todo => {
-    //       const listItem = document.createElement("li");
-    //       listItem.textContent = todo.task;
-    //       todoList.appendChild(listItem);
-    //     });
-    //   })
-    //   .catch(error => {
-    //     console.error("Failed to fetch TODOs:", error);
-    //   });
-  });
-  
+});

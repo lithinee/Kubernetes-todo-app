@@ -1,1 +1,0 @@
-console.log("Hello from the first Node.js script!!!");

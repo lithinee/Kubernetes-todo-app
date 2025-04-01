@@ -1,0 +1,33 @@
+/* styling */
+
+:root {
+    --primary: #6c5ce7;   
+    --accent: #fd79a8;    
+  }
+  
+  .btn-primary {
+    background-color: var(--primary);
+    border-color: var(--primary);
+  }
+  
+  .btn-outline-danger {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+  
+  .btn-outline-danger:hover {
+    background-color: var(--accent);
+    border-color: var(--accent);
+  }
+  
+  .list-group-item:hover {
+    background-color: #f8f9fa;
+  }
+  
+  .completed-task {
+    color: #95a5a6;
+    text-decoration: line-through;
+  }
+
+  
+  
