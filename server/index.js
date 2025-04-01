@@ -8,13 +8,21 @@ const Todo = require("./models/todo");
 
 
 const app = express(); // creating the app
+
 const cors = require("cors");
-app.use(cors()); //Enable CORS for all routes
+
+const corsOptions = {
+  origin: ["http://127.0.0.1:5501", "http://localhost:5501"], // Live Server port
+  methods: ["GET", "POST", "PUT", "DELETE"]
+};
+
+app.use(cors(corsOptions));
+
 
 
 app.use(express.json()); // using middleware 
 
-const PORT = 5000;      
+const PORT = 3001;      
 
 // connect to local MongoDB
 mongoose.connect("mongodb://127.0.0.1:27017/ToDoApp");
@@ -63,6 +71,36 @@ app.post("/todos", async (req, res) => {
   } catch (err) {
     console.error("Error creating TODO:", err.message);
     res.status(500).json({ error: "Server error" });
+  }
+});
+
+// changing the state of the task
+
+app.put("/todos/:id", async (req, res) => {
+  try {
+    const todoId = req.params.id;
+    const updatedTodo = await Todo.findByIdAndUpdate(
+      todoId,
+      { stateOfCompletion: true },
+      { new: true }
+    );
+    res.json(updatedTodo);
+  } catch (err) {
+    console.error("Error updating TODO:", err.message);
+    res.status(500).json({ error: "Failed to update task" });
+  }
+});
+
+// deleting tasks 
+
+app.delete("/todos/:id", async (req, res) => {
+  try {
+    const todoId = req.params.id;
+    await Todo.findByIdAndDelete(todoId);
+    res.json({ message: "Task deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting TODO:", err.message);
+    res.status(500).json({ error: "Failed to delete task" });
   }
 });
 
