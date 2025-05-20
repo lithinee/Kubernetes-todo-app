@@ -12,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => { // wating until HTML is fu
 
   // loading all tasks from the backend and displaying them
   function loadTodos() {
-  fetch("http://127.0.0.1:3001/todos")
+  fetch("/todos")
   .then(response => response.json())
   .then(todos => {
     todoList.innerHTML = "";
@@ -41,7 +41,7 @@ checkbox.addEventListener("change", () => {
     : "";
 
   // sending update to backend
-  fetch(`http://127.0.0.1:3001/todos/${todo._id}`, {
+  fetch(`/todos/${todo._id}`, {
     method: "PUT",
     headers: {
       "Content-Type": "application/json"
@@ -73,7 +73,7 @@ checkbox.addEventListener("change", () => {
 
   // deleting event
   deleteButton.addEventListener("click", () => {
-      fetch(`http://127.0.0.1:3001/todos/${todo._id}`, {
+      fetch(`/todos/${todo._id}`, {
           method: "DELETE"
       })
       .then(() => loadTodos());
@@ -98,7 +98,7 @@ checkbox.addEventListener("change", () => {
       const newTask = taskInput.value.trim();
       if (newTask === "") return;
 
-      fetch("http://127.0.0.1:3001/todos", {
+      fetch("/todos", {
           method: "POST",
           headers: {
               "Content-Type": "application/json"

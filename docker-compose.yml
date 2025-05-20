@@ -7,9 +7,23 @@ services:
     ports:
       - "27017:27017"
 
-  todo-server:
+  todo-server-1:
     build: ./server
     ports:
       - "3001:3001"
     depends_on:
       - mongo-db
+
+  todo-server-2:
+    build: ./server
+    ports:
+      - "3002:3001"  # host:container
+    depends_on:
+      - mongo-db
+
+  todo-frontend:
+    build: ./user
+    ports:
+      - "8080:80"
+    depends_on:
+      - todo-server-1
