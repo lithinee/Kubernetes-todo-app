@@ -16,6 +16,6 @@ spec:
     spec:
       containers:
       - name: frontend
-        image: custom/frontend:v1
+        image: custom/frontend:final
         ports:
         - containerPort: 80
