@@ -34,8 +34,10 @@ const PORT = 3001;
 // connect to local MongoDB database (ToDoApp)
 //mongoose.connect("mongodb://127.0.0.1:27017/ToDoApp"); - before conternisation
 
-mongoose.connect("mongodb://mongo-db:27017/ToDoApp");
+//mongoose.connect("mongodb://mongo-db:27017/ToDoApp");
 
+
+mongoose.connect("mongodb://mongo-service:27017/todos");
 
 
 const db = mongoose.connection;
